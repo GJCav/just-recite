@@ -1,0 +1,21 @@
+/* Common tool classes for PDF printing. */
+
+@media print {
+  .p-d-none {
+    display: none;
+  }
+
+  @page {
+    padding: 2cm;
+    border: 1px solid;
+
+    // 这个不是标准，不考虑了
+    // @top-center {
+    //   content: counter(page) + " / " + counter(pages);
+    // }
+  }
+
+  .p-avoid-break {
+    page-break-inside: avoid;
+  }
+}
