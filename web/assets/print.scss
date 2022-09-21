@@ -6,16 +6,23 @@
   }
 
   @page {
-    padding: 2cm;
-    border: 1px solid;
-
     // 这个不是标准，不考虑了
     // @top-center {
     //   content: counter(page) + " / " + counter(pages);
     // }
   }
 
-  .p-avoid-break {
+  .p-break-inside-avoid {
     page-break-inside: avoid;
+  }
+
+  .p-break-before-allow {
+    page-break-before: auto;
+  }
+
+  .p-break-allow {
+    page-break-inside: auto;
+    page-break-before: auto;
+    page-break-after: auto;
   }
 }

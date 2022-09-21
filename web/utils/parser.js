@@ -1,6 +1,6 @@
 import { Dictionary, Entry, Definition, Example, Pronunciation } from "./model.js"
 
-export const fromPlainText = (text) => {
+export const from_plain_text = (text) => {
     /**
      * Syntax:
      *  <word> | <pron> | <explain> [| <example>...]
@@ -41,5 +41,40 @@ export const fromPlainText = (text) => {
         dic.add(entry)
     }
 
+    return dic;
+}
+
+
+export const get_test_data = () => {
+    const dic = new Dictionary();
+    dic.meta = {
+        name: "test dataset",
+        origin: "https://github.com/gjcav/",
+        tags: ["tag1", "tag2"]
+    }
+    for (let i = 0;i < 10;i++){
+        const e = new Entry();
+        e.word = `pseudoword-${i}`;
+        for (let j = 1;j <= 5;j++){
+            e.add_pron({
+                value: "pron " + j, 
+                zone: "US " + j
+            })
+        }
+        for (let j = 1;j <= 2;j++){
+            const def = new Definition();
+            def.value = `def of "${e.word}": abcdefgh ${j}`
+            def.examples.push({
+                value: "example 1, example 1example 1example 1example 1example 1example 1example 1example 1example 1example 1example 1",
+                translation: "example 1, trans"
+            })
+            def.examples.push({
+                value: "example 2",
+                translation: "example 2, trans trans trans trans trans trans trans trans trans trans trans trans trans trans trans trans trans trans trans trans trans trans trans trans trans trans trans trans "
+            })
+            e.add_def(def)
+        }
+        dic.add(e)
+    }
     return dic;
 }

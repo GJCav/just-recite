@@ -9,7 +9,7 @@ export class Pronunciation {
 // eslint-disable-next-line no-unused-vars
 export class Example {
     value = "";
-    translations = [];
+    translation = "";
 }
 
 

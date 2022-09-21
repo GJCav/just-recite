@@ -8,7 +8,7 @@
 <script>
 import "~/assets/print.scss"
 import { read_file } from "~/utils/io.js"
-import { fromPlainText } from "~/utils/parser"
+import { from_plain_text } from "~/utils/parser"
 
 export default {
   name: 'IndexPage',
@@ -24,7 +24,7 @@ export default {
       if (files.length >= 1) {
         const text = await read_file(files[0])
         this.status = "parsing...";
-        const dic = fromPlainText(text);
+        const dic = from_plain_text(text);
         dic.meta.name = files[0].name
         this.$store.commit("setDictionary", dic);
       }

@@ -70,8 +70,8 @@ export default {
         },
         {
           icon: 'mdi-printer',
-          title: 'Print',
-          to: "/print_paper"
+          title: 'Paper',
+          to: "/paper"
         }
       ],
       miniVariant: false,
