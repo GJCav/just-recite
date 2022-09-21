@@ -9,6 +9,7 @@
 import "~/assets/print.scss"
 import { read_file } from "~/utils/io.js"
 import { from_plain_text } from "~/utils/parser"
+import { Archive } from "~/utils/db"
 
 export default {
   name: 'IndexPage',
@@ -16,6 +17,13 @@ export default {
   data: () => ({
     status: "",
   }),
+
+  mounted() {
+    const a = new Archive("test");
+    a.open().then(() => {
+      console.log("open database")
+    });
+  },
   
   methods:{
     async read_data(evt) {
@@ -30,7 +38,7 @@ export default {
       }
       this.status = "done.";
     }
-  }
+  },
 }
 </script>
 
