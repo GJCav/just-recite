@@ -1,12 +1,20 @@
-import { Dictionary } from "~/utils/model";
+import { Archive } from "~/utils/db";
 
 export const state = () => ({
-    dictionary: new Dictionary()
+    archive: null,
+    persistence: false,
 });
 
+export const getters = {
+    
+};
 
 export const mutations = {
-    setDictionary(state, dic){
-        state.dictionary = dic;
-    }
+    set_persistence(state, v) { state.persistence = v; },
+    set_archive(state, a) { state.archive = a; }
+}
+
+export const actions = {
+// open database action here
+// check persistence here
 }

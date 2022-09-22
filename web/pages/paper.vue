@@ -80,8 +80,8 @@ export default {
 
   methods: {
     get_dictionary() { 
-      // return Object.values(this.$store.state.dictionary.entries); 
-      return get_test_data();
+      // TODO: use archive based getter
+      // return get_test_data();
     },
   }
 }
