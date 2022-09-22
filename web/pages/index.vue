@@ -8,10 +8,7 @@
 import "~/assets/print.scss"
 import { read_file } from "~/utils/io.js"
 import { from_plain_text, get_test_data } from "~/utils/parser"
-import { Archive } from "~/utils/db"
-
-// just for trying
-let archive = null;
+import { open_app_data } from "~/utils/db"
 
 
 export default {
@@ -22,13 +19,8 @@ export default {
   }),
 
   mounted() {
-    const a = new Archive("test");
-    a.open().then(() => {
-      console.log("open database")
-      archive = a;
-    }).catch((e) => {
-      console.log(e)
-      alert("unable to open database");
+    open_app_data().then((app_data) => {
+      app_data.get_property("last_open").then((value) => console.log(value));
     });
   },
   

@@ -26,13 +26,34 @@
       </v-list>
     </v-navigation-drawer>
 
+    <!-- 右设置栏 -->
+    <!-- 记得在下面注册组件，否则动态组件无法正常工作 -->
+    <v-navigation-drawer
+      v-model="right_drawer"
+      clipped temporary fixed app right
+      :width="600" bottom mobile-breakpoint="xs"
+    >
+      <keep-alive>
+        <component 
+          :is="right_drawer_comp"
+          @toggle-right-drawer="toggleRightDrawer"
+          @set-right-drawer="setRightDrawer"
+        >
+        </component>
+      </keep-alive>
+    </v-navigation-drawer>
+
     <!-- 工具栏 -->
     <v-app-bar :clipped-left="true" fixed app class="p-d-none">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-btn icon class="hide-on-print" @click.stop="miniVariant = !miniVariant">
+      <v-btn icon @click.stop="miniVariant = !miniVariant">
         <v-icon>mdi-{{ `chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>
       </v-btn>
       <v-toolbar-title>Just Recite</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn icon @click.stop="right_drawer = !right_drawer">
+        <v-icon>mdi-cog</v-icon>
+      </v-btn>
     </v-app-bar>
 
     <v-main>
@@ -42,7 +63,7 @@
     </v-main>
 
     <!-- 脚注 -->
-    <v-footer :absolute="!fixed" app>
+    <v-footer absolute app>
       <span>&copy; {{ new Date().getFullYear() }}</span>
     </v-footer>
   </v-app>
@@ -50,23 +71,24 @@
 
 <script>
 import "~/assets/print.scss"
+import TestComp from "~/components/TestComp.vue";
+import { open_app_data } from "~/utils/db"
 
 export default {
   name: 'DefaultLayout',
+
+  components: { TestComp },
+
   data() {
     return {
       drawer: false,
-      fixed: false,
+      right_drawer: false, // event: toggle-right-drawer
+      right_drawer_comp: "TestComp", // event: set-right-drawer
       items: [
         {
           icon: 'mdi-apps',
           title: 'Welcome',
           to: '/',
-        },
-        {
-          icon: 'mdi-chart-bubble',
-          title: 'Inspire',
-          to: '/inspire',
         },
         {
           icon: 'mdi-printer',
@@ -79,6 +101,24 @@ export default {
       rightDrawer: false,
     }
   },
+
+  computed: {
+  },
+
+  mounted() {
+  },
+
+  methods: {
+    // event: toggle-right-drawer
+    toggleRightDrawer(v) {
+      this.right_drawer = v;
+    },
+
+    // event: set-right-drawer
+    setRightDrawer(comp) {
+      this.right_drawer_comp = name;
+    }
+  }
 }
 </script>
 
