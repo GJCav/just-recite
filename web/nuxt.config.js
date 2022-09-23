@@ -5,6 +5,7 @@ import colors from 'vuetify/es5/util/colors';
 
 export default {
   ssr: false,
+  target: 'static',
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
