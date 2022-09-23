@@ -1,6 +1,5 @@
-import Dexie from "dexie";
+import Dexie, { liveQuery } from "dexie";
 import { Dictionary } from "./model";
-
 
 export const persist = async () => {
     return await navigator.storage && navigator.storage.persist &&
@@ -42,8 +41,10 @@ export class Archive {
             /**
              * properties of the archive, in format of { name: <name>, value: <value> }.
              * well-defined properties are listed bellow:
-             *   - dic_meta: meta data of the dictionary
-             *   - last_open: last open datetime
+             *  - dic_meta: meta data of the dictionary
+             *  - create_time
+             *  - last_open_time
+             *  TODO: 这里设置复习记录啥的
              */
             property: "name",
             entry: "word",
@@ -58,20 +59,20 @@ export class Archive {
         return true;
     }
 
-    async get_property(name) {
+    async get_property(name, def_value = null) {
         const property = await this.db.property.get(name);
-        return property ? property.value : null;
+        return property ? property.value || def_value : def_value;
     }
 
     async set_property(name, value) {
         await this.db.property.put({name, value});
     }
 
-    set_dictionary(dic) {
+    async set_dictionary(dic) {
         const db = this.db;
-        return db.transaction("rw", db.property, db.entry, async () => {
+        await db.transaction("rw", db.property, db.entry, async () => {
             // delete old data
-            await db.entry.toCollection().delete();
+            await db.entry.clear();
 
             // save new data
             this.set_property("dic_meta", dic.meta);
@@ -92,6 +93,22 @@ export class Archive {
     }
 }
 
+const _archives = {}
+
+/**
+ * get singleton instance for the archive of name `db_name`
+ * @param {*} db_name 
+ * @returns 
+ */
+export const open_archive = async (db_name) => {
+    let archive = null;
+    if (db_name in _archives) archive = _archives[db_name];
+    else archive = new Archive(db_name);
+    if (!archive.db.isOpen()) {
+        await archive.db.open()
+    }
+    return archive
+}
 
 /**
  * 单例模式类，用于管理 Application level 的信息
@@ -106,7 +123,8 @@ class AppData {
              * In format of { name: <name>, value: <value> }.well-defined properties 
              * are listed bellow:
              *  - archive_list: an array of archive names
-             *  - last_open: name of last opened archive
+             *  - bookmarks: an array of bookmarked archive names
+             *  - last_archive: name of last opened archive
              */
             property: "name"
         })
@@ -118,21 +136,100 @@ class AppData {
         }
     }
 
-    async get_property(name) {
+    async get_property(name, def_value = null) {
         const property = await this.db.property.get(name);
-        return property ? property.value : null;
+        return property ? property.value || def_value : def_value;
     }
 
     async set_property(name, value) {
         await this.db.property.put({name, value})
     }
+
+    async create_archive({
+        name,
+        dic,
+    }) {
+        const db = this.db;
+
+        const archive_list = await this.get_property("archive_list", []) ;
+        if (archive_list.includes(name)){
+            throw new Error("archive existed");
+        }
+
+        let archive = await open_archive(name);
+        try {
+            const adb = archive.db;
+            await adb.transaction("rw", [adb.entry, adb.property], async () => {
+                await archive.set_property("create_time", new Date());
+                await archive.set_dictionary(dic);
+            })
+        } catch(e) {
+            window.indexedDB.deleteDatabase(name);
+            throw(e);
+        }
+        
+        try {
+            await this.db.transaction("rw", [db.property], async () => {
+                archive_list.push(name);
+                await this.set_property("archive_list", archive_list)
+            })
+        } catch (e) {
+            archive = null;
+            throw(e);
+        }
+
+        return archive;
+    }
+
+    async delete_archive(name) {
+        const db = this.db;
+
+        if (!(await this.get_property("archive_list", [])).includes(name)) {
+            throw new Error("archive not existed");
+        }
+
+        let book_idx = -1; // for recovery
+        await db.transaction("rw", [db.property], async () => {
+            const archive_list = await this.get_property("archive_list", []);
+            archive_list.splice(archive_list.indexOf(name), 1);
+            await this.set_property("archive_list", archive_list);
+
+            const bookmarks = await this.get_property("bookmarks", []);
+            book_idx = bookmarks.indexOf(name);
+            bookmarks.splice(book_idx, 1);
+            await this.set_property("bookmarks", bookmarks);
+        });
+
+        try {
+            const archive = await open_archive(name);
+            await archive.db.delete();
+        } catch (e) {
+            // recovery
+            await db.transaction("rw", [db.property], async () => {
+                const archive_list = await this.get_property("archive_list", []);
+                archive_list.push(name);
+                await this.set_property("archive_list", archive_list);
+    
+                if (book_idx !== -1) {
+                    const bookmarks = await this.get_property("bookmarks", []);
+                    bookmarks.push(name)
+                    await this.set_property("bookmarks", bookmarks);
+                }
+            }).catch((e) => {
+                const err = new Error("Recover database error. Inconsistence emerges.");
+                err.inner_error = e;
+                throw e;
+            });
+
+            throw(e);
+        }
+    }
+
+    watch_archive_list() {
+        return liveQuery(() => this.db.property.get("archive_list"));
+    }
 }
 
-
-export const open_archive = async (db_name) => {
-    const archive = new Archive(db_name);
-    await archive.db.open()
-}
 
 let _app_data = null;
 

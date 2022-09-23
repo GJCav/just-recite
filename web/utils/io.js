@@ -7,7 +7,6 @@ export const read_file = (file) => {
         }
 
         reader.onload = (event) => {
-            console.log("yes ")
             resolve(reader.result)
         }
 

@@ -43,13 +43,13 @@
       </keep-alive>
     </v-navigation-drawer>
 
-    <!-- 工具栏 -->
-    <v-app-bar :clipped-left="true" fixed app class="p-d-none">
+    <!-- 顶部工具栏 -->
+    <v-app-bar :clipped-left="true" fixed app class="d-print-none">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
       <v-btn icon @click.stop="miniVariant = !miniVariant">
         <v-icon>mdi-{{ `chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>
       </v-btn>
-      <v-toolbar-title>Just Recite</v-toolbar-title>
+      <v-toolbar-title>{{title}}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon @click.stop="right_drawer = !right_drawer">
         <v-icon>mdi-cog</v-icon>
@@ -57,22 +57,34 @@
     </v-app-bar>
 
     <v-main>
+      <!-- 顶部警告框 -->
+      <v-alert 
+        :value="top_alert.enable"
+        :type="top_alert.type" 
+        :dismissible="top_alert.dismissible" 
+        border="left"
+        transition="slide-y-transition"
+        @input="top_alert_change"
+      >
+        <span v-if="!top_alert.component">{{top_alert.message}}</span>
+        <component :is="top_alert.component" v-else></component>
+      </v-alert>
       <v-container>
         <Nuxt />
       </v-container>
     </v-main>
 
     <!-- 脚注 -->
-    <v-footer absolute app>
+    <v-footer absolute app class="d-block">
       <span>&copy; {{ new Date().getFullYear() }}</span>
     </v-footer>
   </v-app>
 </template>
 
 <script>
+import { mapState } from "vuex";
 import "~/assets/print.scss"
 import TestComp from "~/components/TestComp.vue";
-import { open_app_data } from "~/utils/db"
 
 export default {
   name: 'DefaultLayout',
@@ -91,6 +103,11 @@ export default {
           to: '/',
         },
         {
+          icon: "mdi-folder",
+          title: "Manage",
+          to: "/manage"
+        },
+        {
           icon: 'mdi-printer',
           title: 'Paper',
           to: "/paper"
@@ -103,6 +120,8 @@ export default {
   },
 
   computed: {
+    ...mapState(["title", "top_alert"]),
+
   },
 
   mounted() {
@@ -117,7 +136,13 @@ export default {
     // event: set-right-drawer
     setRightDrawer(comp) {
       this.right_drawer_comp = name;
-    }
+    },
+
+    top_alert_change(value) {
+      if(!value){
+        this.$store.commit("set_top_alert", { enable: false })
+      }
+    },
   }
 }
 </script>

@@ -1,9 +1,10 @@
 /* Common tool classes for PDF printing. */
 
 @media print {
-  .p-d-none {
-    display: none;
-  }
+  // vuetify 中有了
+  // .d-print-none {
+  //   display: none;
+  // }
 
   @page {
     // 这个不是标准，不考虑了
