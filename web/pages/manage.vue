@@ -26,23 +26,18 @@ import { open_app_data } from '~/utils/db';
 import { read_file } from '~/utils/io';
 import { from_plain_text } from '~/utils/parser';
 
-let watch_archive_list = null;
-let app_data;
-
 export default {
     name: "ManagePage",
     
     data: () => ({
         test: [1, 2, 3, 4, 5],
-        archive_list: []
+        archive_list: [],
+        archive_list_sub: null
     }),
 
-
     mounted() {
-      open_app_data().then((_app) => {
-        app_data = _app;
-        watch_archive_list = app_data.watch_archive_list();
-        watch_archive_list.subscribe({
+      open_app_data().then((app_data) => {
+        this.archive_list_sub = app_data.subscribe_property("archive_list", {
           next: r => { this.archive_list = r ? r.value : []; },
           error: e => { 
             // console.log(e); // TODO: use error dialog here.
@@ -52,10 +47,10 @@ export default {
       })
     },
 
-    unmounted() {
-      if (watch_archive_list) {
-        watch_archive_list.unsubscribe();
-        watch_archive_list = null;
+    beforeDestroy() {
+      if (this.archive_list_sub) {
+        this.archive_list_sub.unsubscribe();
+        this.archive_list_sub = null;
       }
     },
 

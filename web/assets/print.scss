@@ -6,6 +6,14 @@
   //   display: none;
   // }
 
+  .pt-print-0 {
+    padding-top: 0px !important;
+  }
+
+  .pa-print-0 {
+    padding: 0 !important;
+  }
+
   @page {
     // 这个不是标准，不考虑了
     // @top-center {

@@ -7,6 +7,7 @@
       :clipped="true"
       fixed
       app
+      class="d-print-none"
     >
       <v-list>
         <v-list-item
@@ -32,6 +33,7 @@
       v-model="right_drawer"
       clipped temporary fixed app right
       :width="600" bottom mobile-breakpoint="xs"
+      class="d-print-none"
     >
       <keep-alive>
         <component 
@@ -51,12 +53,12 @@
       </v-btn>
       <v-toolbar-title>{{title}}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn icon @click.stop="right_drawer = !right_drawer">
+      <v-btn v-show="right_drawer_btn" icon @click.stop="right_drawer = !right_drawer">
         <v-icon>mdi-cog</v-icon>
       </v-btn>
     </v-app-bar>
 
-    <v-main>
+    <v-main class="pa-print-0">
       <!-- 顶部警告框 -->
       <v-alert 
         :value="top_alert.enable"
@@ -75,9 +77,9 @@
     </v-main>
 
     <!-- 脚注 -->
-    <v-footer absolute app class="d-block">
+    <!-- <v-footer absolute app>
       <span>&copy; {{ new Date().getFullYear() }}</span>
-    </v-footer>
+    </v-footer> -->
   </v-app>
 </template>
 
@@ -120,8 +122,7 @@ export default {
   },
 
   computed: {
-    ...mapState(["title", "top_alert"]),
-
+    ...mapState(["title", "top_alert", "right_drawer_btn"]),
   },
 
   mounted() {

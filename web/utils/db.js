@@ -31,6 +31,7 @@ export const delete_all_database = async () => {
 export class Archive {
     db_name = "archive_name"
     db = null;
+    _observers = {}; // cache for liveQuery
 
     constructor(db_name) {
         this.db_name = db_name;
@@ -44,6 +45,7 @@ export class Archive {
              *  - dic_meta: meta data of the dictionary
              *  - create_time
              *  - last_open_time
+             *  - bookmark
              *  TODO: 这里设置复习记录啥的
              */
             property: "name",
@@ -84,12 +86,18 @@ export class Archive {
 
     async get_dictionary() {
         const db = this.db;
-        const meta = this.get_property("dic_meta")
+        const meta = await this.get_property("dic_meta")
         const entries = await db.entry.toArray();
         const dic = new Dictionary();
         dic.meta = meta;
         dic.entries = entries;
         return dic;
+    }
+
+    subscribe_property(name, options) {
+        const observable = this._observers[name] || liveQuery(() => this.db.property.get(name));
+        this._observers.bookmark = observable;
+        return observable.subscribe(options);
     }
 }
 
@@ -115,6 +123,7 @@ export const open_archive = async (db_name) => {
  */
 class AppData {
     db = null;
+    _observers = {};
 
     constructor() {
         this.db = new Dexie("_app");
@@ -123,8 +132,7 @@ class AppData {
              * In format of { name: <name>, value: <value> }.well-defined properties 
              * are listed bellow:
              *  - archive_list: an array of archive names
-             *  - bookmarks: an array of bookmarked archive names
-             *  - last_archive: name of last opened archive
+             *  - last_archive: name of last opened or current archive
              */
             property: "name"
         })
@@ -184,20 +192,18 @@ class AppData {
     async delete_archive(name) {
         const db = this.db;
 
+        if((await this.get_property("last_archive")) === name){
+            throw new Error("unable to delete an opening archive");
+        }
+
         if (!(await this.get_property("archive_list", [])).includes(name)) {
             throw new Error("archive not existed");
         }
 
-        let book_idx = -1; // for recovery
         await db.transaction("rw", [db.property], async () => {
             const archive_list = await this.get_property("archive_list", []);
             archive_list.splice(archive_list.indexOf(name), 1);
             await this.set_property("archive_list", archive_list);
-
-            const bookmarks = await this.get_property("bookmarks", []);
-            book_idx = bookmarks.indexOf(name);
-            bookmarks.splice(book_idx, 1);
-            await this.set_property("bookmarks", bookmarks);
         });
 
         try {
@@ -209,12 +215,6 @@ class AppData {
                 const archive_list = await this.get_property("archive_list", []);
                 archive_list.push(name);
                 await this.set_property("archive_list", archive_list);
-    
-                if (book_idx !== -1) {
-                    const bookmarks = await this.get_property("bookmarks", []);
-                    bookmarks.push(name)
-                    await this.set_property("bookmarks", bookmarks);
-                }
             }).catch((e) => {
                 const err = new Error("Recover database error. Inconsistence emerges.");
                 err.inner_error = e;
@@ -225,8 +225,10 @@ class AppData {
         }
     }
 
-    watch_archive_list() {
-        return liveQuery(() => this.db.property.get("archive_list"));
+    subscribe_property(name, options) {
+        const observable = this._observers[name] || liveQuery(() => this.db.property.get(name));
+        this._observers.bookmark = observable;
+        return observable.subscribe(options);
     }
 }
 

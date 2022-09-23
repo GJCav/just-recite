@@ -10,7 +10,9 @@ export const state = () => ({
         type: "error",
         message: "",
         component: null, // remember to register component in ~/layout/default.vue
-    }
+    },
+
+    right_drawer_btn: false,
 });
 
 export const getters = {
@@ -31,7 +33,9 @@ export const mutations = {
             t.component = null;
         }
         state.top_alert = t;
-    }
+    },
+
+    set_right_drawer_btn(state, visible) { state.right_drawer_btn = visible; },
 }
 
 export const actions = {

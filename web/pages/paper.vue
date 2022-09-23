@@ -46,14 +46,24 @@
 
 <script>
 import "~/assets/print.scss"
-import { get_test_data } from "~/utils/parser";
+import { open_app_data, open_archive } from "~/utils/db";
+import { Dictionary } from "~/utils/model";
 
 export default {
   name: "PrintPaper",
-  layout: "paper",
+
+  data: () => ({
+    // component UI
+
+    // archive level
+    archive_name: null,
+
+    // dictionary level
+    dic: new Dictionary(),
+    dic_sub: null,
+  }),
 
   computed: {
-    dic() { return this.get_dictionary() },
     entries() { 
       /**
        * TODO: 这里做各种处理，以满足各类设置需求
@@ -62,7 +72,7 @@ export default {
        */
       // 
       
-      const raw_data = Object.values(this.get_dictionary().entries);
+      const raw_data = Object.values(this.dic.entries);
 
       // 这里将所有定义展开
       const list = [];
@@ -78,12 +88,21 @@ export default {
     }
   },
 
-  methods: {
-    get_dictionary() { 
-      // TODO: use archive based getter
-      // return get_test_data();
-    },
-  }
+  mounted() {
+    this.$store.commit("set_right_drawer_btn", true);
+
+    open_app_data().then(async (app_data) => {
+      this.archive_name = await app_data.get_property("last_archive");
+      if (this.archive_name) {
+        const archive = await open_archive(this.archive_name);
+        this.dic = await archive.get_dictionary();
+      }
+    })
+  },
+
+  beforeDestroy() {
+    this.$store.commit("set_right_drawer_btn", false);
+  },
 }
 </script>
 
