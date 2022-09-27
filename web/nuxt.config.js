@@ -65,9 +65,9 @@ export default {
   build: {},
 
   server: {
-    https: {
-      // key: fs.readFileSync(path.resolve(__dirname, 'localhost+3-key.pem')),
-      // cert: fs.readFileSync(path.resolve(__dirname, 'localhost+3.pem'))
+    https: process.env.NODE_ENV === "production" ? null : {
+      key: fs.readFileSync(path.resolve(__dirname, 'localhost+3-key.pem')),
+      cert: fs.readFileSync(path.resolve(__dirname, 'localhost+3.pem'))
     }
   }
 }
