@@ -21,7 +21,7 @@ export default {
     btn_style() {
       return {
         "width": "3em",
-        "height": "100%",
+        "height": "1.5em",
         "padding": "0 0.3em",
         "border": this.value ? "0px" : "1px solid black",
         "border-radius": "1em",

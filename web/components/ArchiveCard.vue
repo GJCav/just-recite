@@ -189,13 +189,13 @@ export default {
       // archive level
       this.arc_property_arr = (await archive.db.property.toArray());
       this.bookmark_sub = archive.subscribe_property("bookmark", {
-        next: (p) => { this.bookmark = p ? p.value || false : false; },
+        next: (p) => { this.bookmark = p?.value ?? false; },
         error: e => this.show_error(e)
       })
 
       // app level
       this.last_archive_sub = app_data.subscribe_property("last_archive", {
-        next: p => { this.last_archive = p ? p.value || "" : ""; },
+        next: p => { this.last_archive = p?.value ?? ""; },
         error: e => this.show_error(e)
       })
     }).catch(e => this.show_error(e));

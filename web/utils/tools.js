@@ -18,7 +18,7 @@ export const use_rd_tools = (comp) => {
          * restore right drawer state, need `this` context
          */
         pop: (function() {
-            this.$store.commit("set_right_drawer", _right_drawer_state.pop() || {});
+            this.$store.commit("set_right_drawer", _right_drawer_state.pop() ?? {});
         }).bind(comp)
     }
 } 

@@ -3,7 +3,8 @@
   <v-row class="justify-center mb-2"><h1>{{dic.meta.name}}</h1></v-row>
   <v-row
     v-for="(entry, rank) in entries" :key="entry._key"
-    class="font-setting mb-4"
+    class="font-setting"
+    :style="render_style"
     dense
   >
     <!-- word -->
@@ -49,14 +50,19 @@
     >
       <ul> <!-- 这里不能用 flex-column 否则会有奇怪的渲染问题-->
         <li 
-          v-for="e in entry.definitions[0].examples" :key="e.value"
+          v-for="(e, idx) in entry.definitions[0].examples" :key="e.value"
+          :style="idx === 0 ? {} : render_example_spacing"
         >
           <p class="mb-0">
             {{ hide_content('hide_word_in_example') ? 
               _.replace(e.value, entry.word, _.pad('', entry.word.length, '_')) 
               : e.value }}
           </p>
-          <p v-if="!hide_content('hide_example_trans')" class="mb-0 text--secondary">
+          <p 
+            v-if="!hide_content('hide_example_trans')" 
+            class="mb-0 text--secondary"
+            :style="render_translation_style"
+          >
             {{ e.translation}}
           </p>
         </li>
@@ -71,6 +77,7 @@ import "~/assets/print.scss"
 import { open_app_data, open_archive } from "~/utils/db";
 import { Dictionary } from "~/utils/model";
 import { use_rd_tools } from "~/utils/tools";
+import { render_option_list } from "~/components/paper/Config.vue";
 
 export default {
   name: "PrintPaper",
@@ -121,17 +128,37 @@ export default {
 
     hide_content() {
       return (name) => {
-        return (this.paper_config || {})[name] || false;
+        return this.paper_config?.[name] ?? false;
       }
     },
 
     cols_def() {
-      return (this.paper_config || {}).hide_pron ? 9 : 6;
+      return this.paper_config?.hide_pron ? 9 : 6;
     },
 
     cols_def_lg () {
-      return (this.paper_config || {}).hide_pron ? 10 : 8;
+      return this.paper_config?.hide_pron ? 10 : 8;
     },
+
+    render_style () {
+      return {
+        "font-size": this.render_option("render_font_size") + "px",
+        "line-height": this.render_option("render_line_height") + "px",
+        "margin-bottom": this.render_option("render_entry_spacing") + "px"
+      }
+    },
+
+    render_translation_style() {
+      return {
+        "margin-top": this.render_option("render_translation_spacing") + "px"
+      }
+    },
+
+    render_example_spacing() {
+      return {
+        "margin-top": this.render_option("render_example_spacing") + "px"
+      }
+    }
   },
 
   mounted() {
@@ -150,7 +177,7 @@ export default {
 
       this.paper_config = await app_data.get_property("paper_config");
       this.paper_config_sub = await app_data.subscribe_property("paper_config", {
-        next: (p) => { this.paper_config = p ? p.value || {} : {} }
+        next: (p) => { this.paper_config = p?.value ?? {} }
       })
     })
   },
@@ -162,6 +189,12 @@ export default {
       this.paper_config_sub.unsubscribe();
     }
   },
+
+  methods: {
+    render_option(name) {
+      return this.paper_config?.[name] ?? render_option_list.find(v => v.name === name).default;
+    }
+  },
 }
 </script>
 
@@ -169,6 +202,8 @@ export default {
 .font-setting {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 16px;
+  line-height: 24px;
+  // letter-spacing: 1em; // dont support this
 }
 
 .pron-list {

@@ -65,7 +65,7 @@ export class Archive {
 
     async get_property(name, def_value = null) {
         const property = await this.db.property.get(name);
-        return property ? property.value || def_value : def_value;
+        return property?.value ?? def_value;
     }
 
     async set_property(name, value) {
@@ -97,7 +97,7 @@ export class Archive {
     }
 
     subscribe_property(name, options) {
-        const observable = this._observers[name] || liveQuery(() => this.db.property.get(name));
+        const observable = this._observers[name] ?? liveQuery(() => this.db.property.get(name));
         this._observers.bookmark = observable;
         return observable.subscribe(options);
     }
@@ -148,7 +148,7 @@ class AppData {
 
     async get_property(name, def_value = null) {
         const property = await this.db.property.get(name);
-        return property ? property.value || def_value : def_value;
+        return property?.value ?? def_value;
     }
 
     async set_property(name, value) {
@@ -228,7 +228,7 @@ class AppData {
     }
 
     subscribe_property(name, options) {
-        const observable = this._observers[name] || liveQuery(() => this.db.property.get(name));
+        const observable = this._observers[name] ?? liveQuery(() => this.db.property.get(name));
         this._observers.bookmark = observable;
         return observable.subscribe(options);
     }
