@@ -7,6 +7,7 @@
   <v-row>
     <input ref="file_input" class="d-none" type="file" @change="file_change"/>
     <v-btn color="primary" @click="choose_file">New</v-btn>
+    <v-btn color="secondary" @click="test_data">test data</v-btn>
   </v-row>
 
   <v-row>
@@ -24,7 +25,7 @@
 <script>
 import { open_app_data } from '~/utils/db';
 import { read_file } from '~/utils/io';
-import { from_plain_text } from '~/utils/parser';
+import { from_plain_text, get_test_data } from '~/utils/parser';
 
 export default {
     name: "ManagePage",
@@ -81,6 +82,15 @@ export default {
           this.$refs.file_input.value = null;
         }
       },
+
+      async test_data() {
+        const dic = get_test_data();
+        const app_data = await open_app_data();
+        await app_data.create_archive({
+          name: "test data",
+          dic
+        })
+      }
     },
     
 }

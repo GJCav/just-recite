@@ -12,7 +12,10 @@ export const state = () => ({
         component: null, // remember to register component in ~/layout/default.vue
     },
 
-    right_drawer_btn: false,
+    right_drawer: {
+        btn: true,
+        comp: "IndexConfig"
+    }
 });
 
 export const getters = {
@@ -35,7 +38,9 @@ export const mutations = {
         state.top_alert = t;
     },
 
-    set_right_drawer_btn(state, visible) { state.right_drawer_btn = visible; },
+    set_right_drawer(state, option) { 
+        state.right_drawer = {...state.right_drawer, ...option}; 
+    },
 }
 
 export const actions = {

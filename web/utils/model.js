@@ -17,25 +17,34 @@ export class Example {
 export class Definition {
     word = "";
     value = "";
+
+    /**
+     * noun, C, U
+     * vi, vt
+     * adj
+     * adb
+     */
+    part_of_speech = "";
+
+    // irr_trans = [] // TODO: 不好弄，摆烂了
+
+    prons = [];
     examples = [];
 
-
+    add_pron(pron) {
+        pron.word = this.word;
+        this.prons.push(pron)
+    }
 }
 
 
 // eslint-disable-next-line no-unused-vars
 export class Entry {
     word = "";
-    prons = [];
     definitions = [];
 
     constructor(word = "") {
         this.word = word;
-    }
-
-    add_pron(pron) {
-        pron.word = this.word;
-        this.prons.push(pron)
     }
 
     add_def(def) {

@@ -25,7 +25,6 @@
 <script>
 import "~/assets/print.scss"
 
-
 export default {
   name: 'IndexPage',
 
@@ -34,12 +33,10 @@ export default {
   }),
 
   mounted() {
-    // 更改标题
     this.$store.commit("set_title", "Welcome")
   },
 
   beforeDestroy(){
-    // 更改标题
     this.$store.commit("set_title", "Just Recite");
   },
   

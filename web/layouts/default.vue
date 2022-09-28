@@ -30,16 +30,15 @@
     <!-- 右设置栏 -->
     <!-- 记得在下面注册组件，否则动态组件无法正常工作 -->
     <v-navigation-drawer
-      v-model="right_drawer"
+      v-model="right_drawer_show"
       clipped temporary fixed app right
       :width="600" bottom mobile-breakpoint="xs"
       class="d-print-none"
     >
       <keep-alive>
         <component 
-          :is="right_drawer_comp"
+          :is="right_drawer.comp"
           @toggle-right-drawer="toggleRightDrawer"
-          @set-right-drawer="setRightDrawer"
         >
         </component>
       </keep-alive>
@@ -53,7 +52,7 @@
       </v-btn>
       <v-toolbar-title>{{title}}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn v-show="right_drawer_btn" icon @click.stop="right_drawer = !right_drawer">
+      <v-btn v-show="right_drawer.btn" icon @click.stop="right_drawer_show = !right_drawer_show">
         <v-icon>mdi-cog</v-icon>
       </v-btn>
     </v-app-bar>
@@ -86,18 +85,18 @@
 <script>
 import { mapState } from "vuex";
 import "~/assets/print.scss"
-import TestComp from "~/components/TestComp.vue";
+import IndexConfig from "~/components/Config.vue";
+import PaperConfig from "~/components/paper/Config.vue"
 
 export default {
   name: 'DefaultLayout',
 
-  components: { TestComp },
+  components: { IndexConfig, PaperConfig },
 
   data() {
     return {
       drawer: false,
-      right_drawer: false, // event: toggle-right-drawer
-      right_drawer_comp: "TestComp", // event: set-right-drawer
+      right_drawer_show: false, // event: toggle-right-drawer
       items: [
         {
           icon: 'mdi-apps',
@@ -122,7 +121,7 @@ export default {
   },
 
   computed: {
-    ...mapState(["title", "top_alert", "right_drawer_btn"]),
+    ...mapState(["title", "top_alert", "right_drawer"]),
   },
 
   mounted() {
@@ -131,12 +130,7 @@ export default {
   methods: {
     // event: toggle-right-drawer
     toggleRightDrawer(v) {
-      this.right_drawer = v;
-    },
-
-    // event: set-right-drawer
-    setRightDrawer(comp) {
-      this.right_drawer_comp = name;
+      this.right_drawer_show = v;
     },
 
     top_alert_change(value) {

@@ -3,7 +3,7 @@ import { Dictionary, Entry, Definition, Example, Pronunciation } from "./model.j
 export const from_plain_text = (text) => {
     /**
      * Syntax:
-     *  <word> | <pron> | <explain> [| <example>...]
+     *  <word> | <part_of_speech> | <pron> | <explain> [| <example>...]
      */
 
     const lines = text.split("\n")
@@ -16,20 +16,23 @@ export const from_plain_text = (text) => {
     for (const line of lines) {
         const arr = line.split("|")
             .map((val) => val.trim());
-        if (arr.length < 3) {
+        if (arr.length < 4) {
             err.push(line);
             continue;
         }
         const entry = new Entry(arr[0]);
 
+        const speech = arr[1];
+
         const pron = new Pronunciation();
-        pron.value = arr[1];
+        pron.value = arr[2];
         pron.zone = "";
-        entry.add_pron(pron);
 
         const def = new Definition();
-        def.value = arr[2];
-        for(let i = 3;i < arr.length;i++){
+        def.value = arr[3];
+        def.add_pron(pron);
+        def.part_of_speech = speech;
+        for(let i = 4;i < arr.length;i++){
             if(arr[i]){
                 const e = new Example();
                 e.val = arr[i];
@@ -55,17 +58,18 @@ export const get_test_data = () => {
     for (let i = 0;i < 10;i++){
         const e = new Entry();
         e.word = `pseudoword-${i}`;
-        for (let j = 1;j <= 5;j++){
-            e.add_pron({
-                value: "pron " + j, 
-                zone: "US " + j
-            })
-        }
         for (let j = 1;j <= 2;j++){
             const def = new Definition();
+            def.part_of_speech = "adj."
+            for (let j = 1;j <= 5;j++){
+                def.add_pron({
+                    value: "pron " + j, 
+                    zone: "US " + j
+                })
+            }
             def.value = `def of "${e.word}": abcdefgh ${j}`
             def.examples.push({
-                value: "example 1, example 1example 1example 1example 1example 1example 1example 1example 1example 1example 1example 1",
+                value: "example 1, example 1e" + e.word + "le 1example 1example 1example 1example 1example 1example 1example 1example 1",
                 translation: "example 1, trans"
             })
             def.examples.push({

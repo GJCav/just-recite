@@ -46,6 +46,8 @@ export class Archive {
              *  - create_time
              *  - last_open_time
              *  - bookmark
+             *  - paper_config
+             *  - 
              *  TODO: 这里设置复习记录啥的
              */
             property: "name",
